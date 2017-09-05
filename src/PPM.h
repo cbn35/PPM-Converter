@@ -2,9 +2,9 @@
  * Author: Chance Nelson
  */
 
+#include <string.h>
 #include <stdio.h>
-#include "ppm.c"
-
+#include "PPM.c"
 
 FILE * create_ppm_p3(char * name, int width, int height, int max);  // creates and prepares a new p3 file
 FILE * create_ppm_p6(char * name, int width, int height, int max);  // creates and prepares a new p6 file
