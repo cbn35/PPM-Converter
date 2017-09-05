@@ -78,7 +78,3 @@ FILE * convert_p3_to_p6(char * name, FILE * p3, int width, int height, int max) 
 FILE * get_ppm_file_information(FILE * ppm) {
     int width, height, max = 0;
 }
-
-void skip_whitespace(FILE * file) {
-    
-}
