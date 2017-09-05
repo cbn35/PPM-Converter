@@ -72,8 +72,22 @@ void write_pixel(int r, int g, int b, FILE* file) {
 
 FILE * convert_p3_to_p6(char * name, FILE * p3, int width, int height, int max) {
     FILE * output = create_ppm_p6(width, height, max);
+    char * buffer = malloc(sizeof(char) * MAX_BUFFER);
+    int r, g, b = 0;
 
+    // Make sure were at the right position for the P3 fiel pointer
+    rewind(p3);
+    get_ppm_file_information(p3);
 
+    fgets(buffer, 3, p3);
+    while(buffer != NULL) {
+        r = (int) buffer[0];
+        g = (int) buffer[1];
+        b = (int) buffer[2];
+        write_pixel(r, g, b, output);
+    }
+
+    return output;
 }
 
 
