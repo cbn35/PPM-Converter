@@ -7,13 +7,14 @@
 #define BUFFER_SIZE 255
 
 
-FILE * create_ppm_p3(char* name, int width, int height, int max) {
+FILE * create_ppm_p3(char * name, int width, int height, int max) {
     /* Desc: Creates a PPM file with required header
      * Args:
      *      name (char*): name/path of ppm file
      *      width  (int): width of file
      *      height (int): height of file
      *      max    (int): max value of color value in RGB (eg: 255)
+     * Returns (FILE*): File pointer to the P3 file
      */
     FILE * out = fopen(name, "w");
     fprintf(out, "P3\n");
@@ -26,6 +27,14 @@ FILE * create_ppm_p3(char* name, int width, int height, int max) {
 
 
 FILE * create_ppm_p6(char * name, int width, int height, int max) {
+    /* Desc: Creates a PPM file with a P6 header
+     * Args:
+     *      name (char*): name/path of file
+     *      width  (int): width of image
+     *      height (int): height of image
+     *      max    (int): max rgb value for each pixel (eg: 255)
+     * Returns (FILE*): File pointer to the P6 file 
+     */
     FILE * out = fopen(name, 'w');
     fprintf(out, "P6\n");
     fprintf(out, "%d %d\n", width, height);
