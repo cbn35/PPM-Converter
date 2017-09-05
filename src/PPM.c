@@ -71,10 +71,39 @@ void write_pixel(int r, int g, int b, FILE* file) {
 
 
 FILE * convert_p3_to_p6(char * name, FILE * p3, int width, int height, int max) {
-    FILE * output = create_ppm_p6(width, height, max)
+    FILE * output = create_ppm_p6(width, height, max);
+
+
 }
 
 
-FILE * get_ppm_file_information(FILE * ppm) {
-    int width, height, max = 0;
+int * get_ppm_file_information(FILE * ppm) {
+    /* Desc: Reads through a PPM file, and grabs it's header information
+     * Args:
+     *      ppm (FILE*): PPM file to examine
+     * Returns (int*): array of the structure [type, width, height, max]
+     */
+    int type, width, height, max = 0;
+    char * buffer = malloc(sizeof(char) * MAX_BUFFER);
+    
+    // Get the PPM type
+    fgets(buffer, MAX_BUFFER, ppm);
+    while(buffer[0] == '#') fgets(buffer, MAX_BUFFER, ppm);
+    type = atoi(buffer[1]);
+    
+    // Get the width and height
+    fgets(buffer, MAX_BUFFER, ppm);
+    while(buffer[0] == '#') fgets(buffer, MAX_BUFFER, ppm);
+    buffer = strtok(buffer, " ");
+    if(buffer != NULL) {
+        width = atoi(buffer);
+        buffer = strtok(NULL, ",");
+    }
+    
+    // Get the max RGB value
+    fgets(buffer, MAX_BUFFER, ppm);
+    while(buffer[0] == '#') fgets(buffer, MAX_BUFFER, ppm);
+    max = atoi(buffer[1]);
+
+    return {type, width, height, max};
 }
