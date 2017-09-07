@@ -35,7 +35,7 @@ FILE * create_ppm_p6(char * name, int width, int height, int max) {
      *      max    (int): max rgb value for each pixel (eg: 255)
      * Returns (FILE*): File pointer to the P6 file 
      */
-    FILE * out = fopen(name, 'w');
+    FILE * out = fopen(name, "w");
     fprintf(out, "P6\n");
     fprintf(out, "%d %d\n", width, height);
     fprintf(out, "%d", max);
@@ -63,21 +63,56 @@ void write_pixel(int r, int g, int b, FILE* file) {
     }
 
     if(type == "P6") {
-        fputc((unsigned char) r);
-        fputc((unsigned char) g);
-        fputc((unsigned char) b);
+        fputc((unsigned char) r, file);
+        fputc((unsigned char) g, file);
+        fputc((unsigned char) b, file);
     }
 }
 
 
-FILE * convert_p3_to_p6(char * name, FILE * p3, int width, int height, int max) {
-    FILE * output = create_ppm_p6(width, height, max);
-    char * buffer = malloc(sizeof(char) * MAX_BUFFER);
-    int r, g, b = 0;
+int * get_ppm_file_information(FILE * ppm) {
+    /* Desc: Reads through a PPM file, and grabs it's header information
+     * Args:
+     *      ppm (FILE*): PPM file to examine
+     * Returns (int*): array of the structure [type, width, height, max]
+     */
+    char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
+    int * info = malloc(sizeof(int) * 4);
 
-    // Make sure were at the right position for the P3 fiel pointer
+
+    // Get the PPM type
+    fgets(buffer, BUFFER_SIZE, ppm);
+    while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
+    info[0] = atoi("" + buffer[1]);
+    
+    
+    // Get the width and height
+    fgets(buffer, BUFFER_SIZE, ppm);
+    while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
+    buffer = strtok(buffer, " ");
+    int i = 1;
+    if(buffer != NULL && i < 3) {
+        info[i] = atoi(buffer);
+        buffer = strtok(NULL, ",");
+
+    }
+    
+    // Get the max RGB value
+    fgets(buffer, BUFFER_SIZE, ppm);
+    while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
+    info[3] = atoi("" + buffer[1]);
+
+    return info;
+}
+
+
+FILE * convert_p3_to_p6(char * name, FILE * p3) {
     rewind(p3);
-    get_ppm_file_information(p3);
+    int * info = get_ppm_file_information(p3);
+
+    FILE * output = create_ppm_p6(name, info[1], info[2], info[3]);
+    char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
+    int r, g, b = 0;
 
     fgets(buffer, 3, p3);
     while(buffer != NULL) {
@@ -90,34 +125,22 @@ FILE * convert_p3_to_p6(char * name, FILE * p3, int width, int height, int max) 
     return output;
 }
 
+FILE * convert_p6_to_p3(char * name, FILE * p6) {
+    rewind(p6);
+    int * info = get_ppm_file_information(p6);
 
-int * get_ppm_file_information(FILE * ppm) {
-    /* Desc: Reads through a PPM file, and grabs it's header information
-     * Args:
-     *      ppm (FILE*): PPM file to examine
-     * Returns (int*): array of the structure [type, width, height, max]
-     */
-    int type, width, height, max = 0;
-    char * buffer = malloc(sizeof(char) * MAX_BUFFER);
-    
-    // Get the PPM type
-    fgets(buffer, MAX_BUFFER, ppm);
-    while(buffer[0] == '#') fgets(buffer, MAX_BUFFER, ppm);
-    type = atoi(buffer[1]);
-    
-    // Get the width and height
-    fgets(buffer, MAX_BUFFER, ppm);
-    while(buffer[0] == '#') fgets(buffer, MAX_BUFFER, ppm);
-    buffer = strtok(buffer, " ");
-    if(buffer != NULL) {
-        width = atoi(buffer);
-        buffer = strtok(NULL, ",");
+    FILE * output = create_ppm_p6(name, info[1], info[2], info[3]);         // create output file
+    char * buffer = malloc(sizeof(char) * BUFFER_SIZE);                     // create reading buffer
+    int * pixArray = malloc(sizeof(int) * atoi(info[1]) * atoi(info[2]));   // create array for storing pixel values
+    int r, g, b, = 0;                                                       // temp vars for RGB pixel values
+
+    for(int i = 0; i < atoi(info[1]); i++) {
+        for(int j = 0; j < atoi(info[2]); j++) {
+            
+        }
     }
-    
-    // Get the max RGB value
-    fgets(buffer, MAX_BUFFER, ppm);
-    while(buffer[0] == '#') fgets(buffer, MAX_BUFFER, ppm);
-    max = atoi(buffer[1]);
 
-    return {type, width, height, max};
+    
+
+    fgets(buffer, BUFFER_SIZE, p6);
 }
