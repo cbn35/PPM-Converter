@@ -13,3 +13,4 @@ void write_pixel(int r, int g, int b, FILE * file);                 // writes a 
 FILE * convert_p3_to_p6(char * name, FILE * p3);                    // convert from p3 to p6
 FILE * convert_p6_to_p3(char * name, FILE * p6);                    // convert from p6 to p3
 int * get_ppm_file_information(FILE * file);                        // Get the formatted metadata of a ppm file
+int * read_image(FILE * image);                                     // Get an array of RGB values based on an image
