@@ -124,19 +124,56 @@ int * get_ppm_file_information(FILE * ppm) {
     return info;
 }
 
-/*
+
 int * read_image(FILE * image) {
+    /* Reads in a PPM file, and creates an array of RGB values representing the pixels
+     * Args:
+     *      image (FILE*): File pointer to PPM image.
+     * Returns (int*): 1D array of lenth width * height * 3, with RGB values for each pixel
+     */
     int * metadata = get_ppm_file_information(image); // Grab the metadata
 
     // Set up the pixel array to be returned
-    int * image = malloc(sizeof(int) * metadata[1]);
-    for(int i = 0; i < metadata[1]; i++) image[i] = malloc(sizeof(int) * metadata[2]);
+    int * pixels = malloc(sizeof(int) * metadata[1] * metadata[2] * 3);  // width * height * 3 vals each
+    
+    char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
 
+    // If it's a P3 file, we have to read in chars one at a time separated by spaces, then atoi them
+    if(metadata[0] == 3) {
+        int bufferIndex = 0;
+        fgets(buffer, BUFFER_SIZE, image);
+        while(buffer != NULL) {
+            for(int i = 0; i < BUFFER_SIZE; i++) {
+                char pixBuffer[BUFFER_SIZE];
+                int j = i
+                while(buffer[i] != ' ' && buffer[i] != '\n') {
+                    pixBuffer[i - j] = buffer[i];
+                }
+                
+                pixels[bufferIndex] = atoi(pixBuffer);
+                bufferIndex++;
+            }
+        }
+    }
 
+    // If it's a P6 file, read in one char at a time, then cast that value to an int
+    if(metadata[0] == 6) {
+        int bufferIndex = 0;
+        fgets(buffer, BUFFER_SIZE, image);
+        while(buffer != NULL) {
+            for(int i = 0; i < BUFFER_SIZE; i++) {
+                char pixBuffer = buffer[i];
+                pixels[bufferIndex] = (int) picBuffer;
+                bufferIndex++;
+            }
+        }
+    }
+
+    return pixels;
 }
 
 
-
+/*
 FILE * convert_p3_to_p6(char * name, FILE * p3) {
     rewind(p3);
     int * info = get_ppm_file_information(p3);
