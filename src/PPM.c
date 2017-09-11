@@ -79,31 +79,62 @@ int * get_ppm_file_information(FILE * ppm) {
     char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
     int * info = malloc(sizeof(int) * 4);
 
-
     // Get the PPM type
     fgets(buffer, BUFFER_SIZE, ppm);
     while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
-    info[0] = atoi("" + buffer[1]);
-    
+    char temp[1];          // Create a temporary string for atoi
+    temp[0] = buffer[1];   // Stick the char representing the file type into temp
+    info[0] = atoi(temp);  // Finally, grab the actual number
     
     // Get the width and height
     fgets(buffer, BUFFER_SIZE, ppm);
     while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
-    buffer = strtok(buffer, " ");
-    int i = 1;
-    if(buffer != NULL && i < 3) {
-        info[i] = atoi(buffer);
-        buffer = strtok(NULL, ",");
-
+    char dimensionBuffer[255];
+    int i = 0;
+    while(buffer[i] != ' ' && buffer[i] != '\n') {
+        dimensionBuffer[i] = buffer[i];
+        i++;
     }
-    
+
+    info[1] = atoi(dimensionBuffer);
+
+    if(buffer[i] == '\n') {
+        fgets(buffer, BUFFER_SIZE, ppm);
+        i = 0;
+    } else {
+        i++;
+    }
+
+    int j = i;
+    while(buffer[i] != '\n') {
+        dimensionBuffer[i - j] = buffer[i];
+        i++;
+    }
+
+    for(i = 0; i < 255; i++) printf("%c\n", dimensionBuffer[i]);
+
+    info[2] = atoi(dimensionBuffer);
+
+
     // Get the max RGB value
     fgets(buffer, BUFFER_SIZE, ppm);
     while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
-    info[3] = atoi("" + buffer[1]);
+    info[3] = atoi(buffer);
 
     return info;
 }
+
+/*
+int * read_image(FILE * image) {
+    int * metadata = get_ppm_file_information(image); // Grab the metadata
+
+    // Set up the pixel array to be returned
+    int * image = malloc(sizeof(int) * metadata[1]);
+    for(int i = 0; i < metadata[1]; i++) image[i] = malloc(sizeof(int) * metadata[2]);
+
+
+}
+
 
 
 FILE * convert_p3_to_p6(char * name, FILE * p3) {
@@ -131,16 +162,31 @@ FILE * convert_p6_to_p3(char * name, FILE * p6) {
 
     FILE * output = create_ppm_p6(name, info[1], info[2], info[3]);         // create output file
     char * buffer = malloc(sizeof(char) * BUFFER_SIZE);                     // create reading buffer
+    char charToIntBuffer;                                                   // create second buffer for grabbing individual RGB values
     int * pixArray = malloc(sizeof(int) * atoi(info[1]) * atoi(info[2]));   // create array for storing pixel values
-    int r, g, b, = 0;                                                       // temp vars for RGB pixel values
+    int pixel[3];                                                           // temp vars for RGB pixel values
 
-    for(int i = 0; i < atoi(info[1]); i++) {
-        for(int j = 0; j < atoi(info[2]); j++) {
+    /* Run through the width and height of the image,
+     * grabbing three numbers and assign these to the
+     * rgb variables, then send that and the file pointer
+     * to write_pixel
+     */ /*
+    for(int i = 0; i < atoi(info[1]) * atoi(info[2]); i++) {
+        for(int k = 0; k < 2; k++) {
+            fgetc(charToIntBuffer, p6);
+            int i = 0;
+            while(charToIntBuffer != '\n' || charToIntBuffer != ' ' || i < 3) {
+                buffer[i] = charToIntBuffer 
+            }
+            
             
         }
+
     }
 
     
 
     fgets(buffer, BUFFER_SIZE, p6);
 }
+
+*/
