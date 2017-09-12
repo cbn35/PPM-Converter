@@ -16,7 +16,7 @@ FILE * create_ppm_p3(char * name, int width, int height, int max) {
      *      max    (int): max value of color value in RGB (eg: 255)
      * Returns (FILE*): File pointer to the P3 file
      */
-    FILE * out = fopen(name, "w");
+    FILE * out = fopen(name, "w+");
     fprintf(out, "P3\n");
     fprintf(out, "%d\n", width);
     fprintf(out, "%d\n", height);
@@ -35,42 +35,12 @@ FILE * create_ppm_p6(char * name, int width, int height, int max) {
      *      max    (int): max rgb value for each pixel (eg: 255)
      * Returns (FILE*): File pointer to the P6 file
      */
-    FILE * out = fopen(name, "w");
+    FILE * out = fopen(name, "w+");
     fprintf(out, "P6\n");
     fprintf(out, "%d %d\n", width, height);
     fprintf(out, "%d", max);
 
     return out;
-}
-
-
-int write_pixel(int r, int g, int b, FILE* file) {
-    /* Desc: Writes a pixel to a PPM file
-     * Args:
-     *      r, g, b (int)  : RGB values for the pixel
-     *      file    (FILE*): File to write to
-     */
-
-    // Get the filetype. Currently P3 and P6 have support
-    char type[2];
-    rewind(file);
-    fgets(type, 2, file);
-
-    fseek(file, 0, SEEK_END);
-
-    if(type == "P3") {
-        fprintf(file, "%d %d %d\n", r, g, b);
-        return 0;
-    }
-
-    if(type == "P6") {
-        fputc((unsigned char) r, file);
-        fputc((unsigned char) g, file);
-        fputc((unsigned char) b, file);
-        return 0;
-    }
-
-    return -1;
 }
 
 
@@ -93,6 +63,7 @@ int * get_ppm_file_information(FILE * ppm) {
     // Get the width and height
     fgets(buffer, BUFFER_SIZE, ppm);
     while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
+    printf(buffer);
     char dimensionBuffer[255];
     int i = 0;
     while(buffer[i] != ' ' && buffer[i] != '\n') {
@@ -123,6 +94,35 @@ int * get_ppm_file_information(FILE * ppm) {
     info[3] = atoi(buffer);
 
     return info;
+}
+
+
+int write_pixel(int r, int g, int b, FILE* file) {
+    /* Desc: Writes a pixel to a PPM file
+     * Args:
+     *      r, g, b (int)  : RGB values for the pixel
+     *      file    (FILE*): File to write to
+     */
+
+    // Get the filetype. Currently P3 and P6 have support
+    rewind(file);
+    int * metadata = get_ppm_file_information(file);
+
+    fseek(file, 0, SEEK_END);
+
+    if(metadata[0] == 3) {
+        fprintf(file, "%d %d %d\n", r, g, b);
+        return 0;
+    }
+
+    if(metadata[0] == 6) {
+        fputc((unsigned char) r, file);
+        fputc((unsigned char) g, file);
+        fputc((unsigned char) b, file);
+        return 0;
+    }
+
+    return -1;
 }
 
 
