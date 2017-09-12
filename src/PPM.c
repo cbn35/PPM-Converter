@@ -136,24 +136,36 @@ int * read_image(FILE * image) {
 
     // Set up the pixel array to be returned
     int * pixels = malloc(sizeof(int) * metadata[1] * metadata[2] * 3);  // width * height * 3 vals each
+<<<<<<< Updated upstream
+=======
+    int pixelsIndex = 0;
+>>>>>>> Stashed changes
 
     char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
 
     // If it's a P3 file, we have to read in chars one at a time separated by spaces, then atoi them
     if(metadata[0] == 3) {
-        int bufferIndex = 0;
-        fgets(buffer, BUFFER_SIZE, image);
-        while(buffer != NULL) {
-            for(int i = 0; i < BUFFER_SIZE; i++) {
-                char pixBuffer[BUFFER_SIZE];
-                int j = i;
+        char charToIntBuffer[BUFFER_SIZE];                     // Set up buffer to put individual numbers in
+        int charToIntIndex = 0;                                // We need a unique index for this buffer
+        fgets(buffer, BUFFER_SIZE, image);                     // Fill the original buffer
+        while(buffer != EOF) {                                 // Keep reading until the end of the file
+            for(int i = 0; i < BUFFER_SIZE; i++) {             // Run through the buffer, grab each individual number, then refill the buffer
                 while(buffer[i] != ' ' && buffer[i] != '\n') {
-                    pixBuffer[i - j] = buffer[i];
+                    charToIntBuffer[charToIntIndex++] = buffer[i];
                 }
+<<<<<<< Updated upstream
 
                 pixels[bufferIndex] = atoi(pixBuffer);
                 bufferIndex++;
+=======
+            
+                charToIntBuffer[charToIntIndex] = '\0';         // Stick a null terminator ar the end of the number to prevent overflow 
+                pixels[pixelsIndex++] = atoi(charToIntBuffer);  // Grab the actual integer value
+                charToIntIndex = 0;                             // Reset the charToIntBuffer
+>>>>>>> Stashed changes
             }
+
+            fgets(buffer, BUFFER_SIZE, image);                  // Refill the buffer
         }
     }
 
