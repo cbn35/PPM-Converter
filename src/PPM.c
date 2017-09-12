@@ -136,10 +136,7 @@ int * read_image(FILE * image) {
 
     // Set up the pixel array to be returned
     int * pixels = malloc(sizeof(int) * metadata[1] * metadata[2] * 3);  // width * height * 3 vals each
-<<<<<<< Updated upstream
-=======
     int pixelsIndex = 0;
->>>>>>> Stashed changes
 
     char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
 
@@ -153,16 +150,10 @@ int * read_image(FILE * image) {
                 while(buffer[i] != ' ' && buffer[i] != '\n') {
                     charToIntBuffer[charToIntIndex++] = buffer[i];
                 }
-<<<<<<< Updated upstream
-
-                pixels[bufferIndex] = atoi(pixBuffer);
-                bufferIndex++;
-=======
-            
                 charToIntBuffer[charToIntIndex] = '\0';         // Stick a null terminator ar the end of the number to prevent overflow 
                 pixels[pixelsIndex++] = atoi(charToIntBuffer);  // Grab the actual integer value
                 charToIntIndex = 0;                             // Reset the charToIntBuffer
->>>>>>> Stashed changes
+            
             }
 
             fgets(buffer, BUFFER_SIZE, image);                  // Refill the buffer
