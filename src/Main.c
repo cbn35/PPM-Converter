@@ -28,7 +28,7 @@ int main(int argc, char ** argv) {
     }
 
     // Check that output file doesn't exist
-    FILE * testOpenOutput = fopen(argv[2], "r");
+    FILE * testOpenOutput = fopen(argv[3], "r");
     if(testOpenOutput != NULL) {
         printf("ERROR: Output file already exists\n");
         printf(errMsg);
