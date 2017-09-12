@@ -11,7 +11,7 @@ int main(int argc, char ** argv) {
     char * errMsg = "ppmrw: convert between the PPM P3 and P6 formats\nUSAGE: ppmrw 3/6 <IMPUT FILE> <OUTPUT FILE>\n";
    
     // Check for wrong number of args 
-    if(4 > argc < 4) {
+    if(4 > argc || argc < 4) {
         printf("ERROR: incorrect number of args\n");
         printf(errMsg);
         return 0;
@@ -69,17 +69,31 @@ int main(int argc, char ** argv) {
 
     // Get a count of the number of RGB values in the file
     int count = 1;
-    buffer[0] = fgetc(input);
-    while(buffer[0] != EOF) {
-        if(buffer[0] == ' ') count++;
-        buffer[0] = fgetc(input);
+    char buffer = fgetc(input);
+    while(buffer != EOF) {
+        if(metadata[0] == 3 && buffer == ' ') count++;
+        if(metadata[0] == 6) count++;
+        buffer = fgetc(input);
     }
+    count++;
 
     // If the pixmap array doesn't match the number of actual RGB values, abort
     if(count != (metadata[1] * metadata[2] * 3)) {
+        printf("%d\n", count);
+        printf("%d\n", metadata[1] * metadata[2] * 3);
         printf("ERROR: Image dimensions do not match header values\n");
         printf(errMsg);
         fclose(input);
         free(pixmap);
+        return 0;
+    }
+
+    FILE * out;
+    if(atoi(argv[1]) == 3) out = create_ppm_p3(argv[3], metadata[1], metadata[2], metadata[3]);
+    if(atoi(argv[1]) == 6) out = create_ppm_p6(argv[3], metadata[1], metadata[2], metadata[3]);
+
+    for(int i = 0; i < metadata[1] * metadata[2] * 3; i += 3) {
+        for(int j = i; j < i + 3; j++) printf("%d", pixmap[j]);
+        write_pixel(pixmap[i], pixmap[i + 1], pixmap[i + 2], out);
     }
 }
