@@ -32,6 +32,7 @@ int main(int argc, char ** argv) {
     if(testOpenOutput != NULL) {
         printf("ERROR: Output file already exists\n");
         printf(errMsg);
+        return 0;
     }
 
     FILE * input = fopen(argv[2], "r");
