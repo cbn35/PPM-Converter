@@ -21,8 +21,8 @@ FILE * create_ppm_p3(char * name, int width, int height, int max) {
     fprintf(out, "%d\n", width);
     fprintf(out, "%d\n", height);
     fprintf(out, "%d\n", max);
-    
-    return out;    
+
+    return out;
 }
 
 
@@ -33,13 +33,13 @@ FILE * create_ppm_p6(char * name, int width, int height, int max) {
      *      width  (int): width of image
      *      height (int): height of image
      *      max    (int): max rgb value for each pixel (eg: 255)
-     * Returns (FILE*): File pointer to the P6 file 
+     * Returns (FILE*): File pointer to the P6 file
      */
     FILE * out = fopen(name, "w");
     fprintf(out, "P6\n");
     fprintf(out, "%d %d\n", width, height);
     fprintf(out, "%d", max);
-    
+
     return out;
 }
 
@@ -89,7 +89,7 @@ int * get_ppm_file_information(FILE * ppm) {
     char temp[1];          // Create a temporary string for atoi
     temp[0] = buffer[1];   // Stick the char representing the file type into temp
     info[0] = atoi(temp);  // Finally, grab the actual number
-    
+
     // Get the width and height
     fgets(buffer, BUFFER_SIZE, ppm);
     while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
@@ -115,10 +115,7 @@ int * get_ppm_file_information(FILE * ppm) {
         i++;
     }
 
-    for(i = 0; i < 255; i++) printf("%c\n", dimensionBuffer[i]);
-
     info[2] = atoi(dimensionBuffer);
-
 
     // Get the max RGB value
     fgets(buffer, BUFFER_SIZE, ppm);
@@ -139,7 +136,7 @@ int * read_image(FILE * image) {
 
     // Set up the pixel array to be returned
     int * pixels = malloc(sizeof(int) * metadata[1] * metadata[2] * 3);  // width * height * 3 vals each
-    
+
     char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
 
     // If it's a P3 file, we have to read in chars one at a time separated by spaces, then atoi them
@@ -153,7 +150,7 @@ int * read_image(FILE * image) {
                 while(buffer[i] != ' ' && buffer[i] != '\n') {
                     pixBuffer[i - j] = buffer[i];
                 }
-                
+
                 pixels[bufferIndex] = atoi(pixBuffer);
                 bufferIndex++;
             }
