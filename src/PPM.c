@@ -63,7 +63,6 @@ int * get_ppm_file_information(FILE * ppm) {
     // Get the width and height
     fgets(buffer, BUFFER_SIZE, ppm);
     while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
-    printf(buffer);
     char dimensionBuffer[255];
     int i = 0;
     while(buffer[i] != ' ' && buffer[i] != '\n') {
@@ -146,11 +145,16 @@ int * read_image(FILE * image) {
         char charToIntBuffer[BUFFER_SIZE];                         // Set up buffer to put individual numbers in
         int charToIntIndex = 0;                                    // We need a unique index for this buffer
         while(fgets(buffer, BUFFER_SIZE, image) != NULL) {         // Keep reading until the end of the file
-            for(int i = 0; i < BUFFER_SIZE; i++) {                 // Run through the buffer, grab each individual number, then refill the buffer
+            for(int i = 0; i < BUFFER_SIZE; i++) {                // Run through the buffer, grab each individual number, then refill the buffer
+                if(buffer[i] == '\0') {
+                    charToIntIndex = 0;
+                    break;
+                }
+
                 if(buffer[i] != ' ' && buffer[i] != '\n') {
-                    charToIntBuffer[charToIntIndex++] = buffer[i];
+                    charToIntBuffer[charToIntIndex] = buffer[i];
+                    charToIntIndex++;
                 } else {
-                    charToIntBuffer[charToIntIndex] = '\0';         // Stick a null terminator ar the end of the number to prevent overflow 
                     pixels[pixelsIndex++] = atoi(charToIntBuffer);  // Grab the actual integer value
                     charToIntIndex = 0;                             // Reset the charToIntBuffer
                 }
