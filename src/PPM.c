@@ -132,31 +132,29 @@ int * read_image(FILE * image) {
      *      image (FILE*): File pointer to PPM image.
      * Returns (int*): 1D array of lenth width * height * 3, with RGB values for each pixel
      */
+    rewind(image);                                    // Make sure the file pointer is at the beginning
     int * metadata = get_ppm_file_information(image); // Grab the metadata
 
     // Set up the pixel array to be returned
     int * pixels = malloc(sizeof(int) * metadata[1] * metadata[2] * 3);  // width * height * 3 vals each
     int pixelsIndex = 0;
 
-    char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
+    char * buffer = malloc(sizeof(char) * BUFFER_SIZE); 
 
     // If it's a P3 file, we have to read in chars one at a time separated by spaces, then atoi them
     if(metadata[0] == 3) {
-        char charToIntBuffer[BUFFER_SIZE];                     // Set up buffer to put individual numbers in
-        int charToIntIndex = 0;                                // We need a unique index for this buffer
-        fgets(buffer, BUFFER_SIZE, image);                     // Fill the original buffer
-        while(buffer != EOF) {                                 // Keep reading until the end of the file
-            for(int i = 0; i < BUFFER_SIZE; i++) {             // Run through the buffer, grab each individual number, then refill the buffer
-                while(buffer[i] != ' ' && buffer[i] != '\n') {
+        char charToIntBuffer[BUFFER_SIZE];                         // Set up buffer to put individual numbers in
+        int charToIntIndex = 0;                                    // We need a unique index for this buffer
+        while(fgets(buffer, BUFFER_SIZE, image) != NULL) {         // Keep reading until the end of the file
+            for(int i = 0; i < BUFFER_SIZE; i++) {                 // Run through the buffer, grab each individual number, then refill the buffer
+                if(buffer[i] != ' ' && buffer[i] != '\n') {
                     charToIntBuffer[charToIntIndex++] = buffer[i];
+                } else {
+                    charToIntBuffer[charToIntIndex] = '\0';         // Stick a null terminator ar the end of the number to prevent overflow 
+                    pixels[pixelsIndex++] = atoi(charToIntBuffer);  // Grab the actual integer value
+                    charToIntIndex = 0;                             // Reset the charToIntBuffer
                 }
-                charToIntBuffer[charToIntIndex] = '\0';         // Stick a null terminator ar the end of the number to prevent overflow 
-                pixels[pixelsIndex++] = atoi(charToIntBuffer);  // Grab the actual integer value
-                charToIntIndex = 0;                             // Reset the charToIntBuffer
-            
             }
-
-            fgets(buffer, BUFFER_SIZE, image);                  // Refill the buffer
         }
     }
 
