@@ -44,7 +44,7 @@ FILE * create_ppm_p6(char * name, int width, int height, int max) {
 }
 
 
-void write_pixel(int r, int g, int b, FILE* file) {
+int write_pixel(int r, int g, int b, FILE* file) {
     /* Desc: Writes a pixel to a PPM file
      * Args:
      *      r, g, b (int)  : RGB values for the pixel
@@ -60,13 +60,17 @@ void write_pixel(int r, int g, int b, FILE* file) {
 
     if(type == "P3") {
         fprintf(file, "%d %d %d\n", r, g, b);
+        return 0;
     }
 
     if(type == "P6") {
         fputc((unsigned char) r, file);
         fputc((unsigned char) g, file);
         fputc((unsigned char) b, file);
+        return 0;
     }
+
+    return -1;
 }
 
 
@@ -145,7 +149,7 @@ int * read_image(FILE * image) {
         while(buffer != NULL) {
             for(int i = 0; i < BUFFER_SIZE; i++) {
                 char pixBuffer[BUFFER_SIZE];
-                int j = i
+                int j = i;
                 while(buffer[i] != ' ' && buffer[i] != '\n') {
                     pixBuffer[i - j] = buffer[i];
                 }
@@ -163,7 +167,7 @@ int * read_image(FILE * image) {
         while(buffer != NULL) {
             for(int i = 0; i < BUFFER_SIZE; i++) {
                 char pixBuffer = buffer[i];
-                pixels[bufferIndex] = (int) picBuffer;
+                pixels[bufferIndex] = (int) pixBuffer;
                 bufferIndex++;
             }
         }
