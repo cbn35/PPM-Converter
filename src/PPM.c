@@ -18,8 +18,7 @@ FILE * create_ppm_p3(char * name, int width, int height, int max) {
      */
     FILE * out = fopen(name, "w+");
     fprintf(out, "P3\n");
-    fprintf(out, "%d\n", width);
-    fprintf(out, "%d\n", height);
+    fprintf(out, "%d %d\n", width, height);
     fprintf(out, "%d\n", max);
 
     return out;
@@ -38,7 +37,7 @@ FILE * create_ppm_p6(char * name, int width, int height, int max) {
     FILE * out = fopen(name, "w+");
     fprintf(out, "P6\n");
     fprintf(out, "%d %d\n", width, height);
-    fprintf(out, "%d", max);
+    fprintf(out, "%d\n", max);
 
     return out;
 }
@@ -56,21 +55,26 @@ int * get_ppm_file_information(FILE * ppm) {
     // Get the PPM type
     fgets(buffer, BUFFER_SIZE, ppm);
     while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
-    char temp[1];          // Create a temporary string for atoi
+    char temp[2];          // Create a temporary string for atoi
     temp[0] = buffer[1];   // Stick the char representing the file type into temp
+    temp[1] = '\0';        // Stick a null terminator in to prevent undefined behavior
     info[0] = atoi(temp);  // Finally, grab the actual number
+
+    printf("%c\n", temp[0]);
+    printf("%d\n", info[0]);
 
     // Get the width and height
     fgets(buffer, BUFFER_SIZE, ppm);
     while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
-    char dimensionBuffer[255];
+    char widthBuffer[255];
     int i = 0;
     while(buffer[i] != ' ' && buffer[i] != '\n') {
-        dimensionBuffer[i] = buffer[i];
+        widthBuffer[i] = buffer[i];
         i++;
     }
 
-    info[1] = atoi(dimensionBuffer);
+    widthBuffer[i] = ' ';
+    info[1] = atoi(widthBuffer);
 
     if(buffer[i] == '\n') {
         fgets(buffer, BUFFER_SIZE, ppm);
@@ -79,13 +83,14 @@ int * get_ppm_file_information(FILE * ppm) {
         i++;
     }
 
+    char heightBuffer[BUFFER_SIZE];
     int j = i;
     while(buffer[i] != '\n') {
-        dimensionBuffer[i - j] = buffer[i];
+        heightBuffer[i - j] = buffer[i];
         i++;
     }
-
-    info[2] = atoi(dimensionBuffer);
+    
+    info[2] = atoi(heightBuffer);
 
     // Get the max RGB value
     fgets(buffer, BUFFER_SIZE, ppm);
@@ -107,10 +112,10 @@ int write_pixel(int r, int g, int b, FILE* file) {
     rewind(file);
     int * metadata = get_ppm_file_information(file);
 
-    fseek(file, 0, SEEK_END);
+    fseek(file, 0, SEEK_END); 
 
     if(metadata[0] == 3) {
-        fprintf(file, "%d %d %d\n", r, g, b);
+        fprintf(file, "%d\n%d\n%d\n", r, g, b);
         return 0;
     }
 
@@ -145,7 +150,7 @@ int * read_image(FILE * image) {
         char charToIntBuffer[BUFFER_SIZE];                         // Set up buffer to put individual numbers in
         int charToIntIndex = 0;                                    // We need a unique index for this buffer
         while(fgets(buffer, BUFFER_SIZE, image) != NULL) {         // Keep reading until the end of the file
-            for(int i = 0; i < BUFFER_SIZE; i++) {                // Run through the buffer, grab each individual number, then refill the buffer
+            for(int i = 0; i < BUFFER_SIZE; i++) {                 // Run through the buffer, grab each individual number, then refill the buffer
                 if(buffer[i] == '\0') {
                     charToIntIndex = 0;
                     break;
@@ -157,6 +162,7 @@ int * read_image(FILE * image) {
                 } else {
                     pixels[pixelsIndex++] = atoi(charToIntBuffer);  // Grab the actual integer value
                     charToIntIndex = 0;                             // Reset the charToIntBuffer
+                    for(int index = 0; index < BUFFER_SIZE; index++) charToIntBuffer[index] = ' ';
                 }
             }
         }
