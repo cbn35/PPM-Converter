@@ -32,6 +32,7 @@ int main(int argc, char ** argv) {
     if(testOpenOutput != NULL) {
         printf("ERROR: Output file already exists\n");
         printf(errMsg);
+        fclose(testOpenOutput);
         return 0;
     }
 
@@ -63,20 +64,20 @@ int main(int argc, char ** argv) {
     }
 
     int * pixmap = read_image(input);  // Get the pixmap for the file
-    
+
     // Move the file pointer for input to the beginning of the pixel data
     rewind(input);
     get_ppm_file_information(input);
 
     // Get a count of the number of RGB values in the file
-    int count = 1;
+    int count = 0;
     char buffer = fgetc(input);
     while(buffer != EOF) {
-        if(metadata[0] == 3 && buffer == ' ') count++;
+        if(metadata[0] == 3 && (buffer == ' ' || buffer == '\n')) count++; 
         if(metadata[0] == 6) count++;
+        
         buffer = fgetc(input);
     }
-    count++;
 
     // If the pixmap array doesn't match the number of actual RGB values, abort
     if(count != (metadata[1] * metadata[2] * 3)) {
@@ -93,8 +94,7 @@ int main(int argc, char ** argv) {
     if(atoi(argv[1]) == 3) out = create_ppm_p3(argv[3], metadata[1], metadata[2], metadata[3]);
     if(atoi(argv[1]) == 6) out = create_ppm_p6(argv[3], metadata[1], metadata[2], metadata[3]);
 
-    for(int i = 0; i < metadata[1] * metadata[2] * 3; i += 3) {
-        for(int j = i; j < i + 3; j++) printf("%d", pixmap[j]);
-        write_pixel(pixmap[i], pixmap[i + 1], pixmap[i + 2], out);
+    for(int i = 0; i < metadata[1] * metadata[2] * 3; i += 3) { 
+        if (write_pixel(pixmap[i], pixmap[i + 1], pixmap[i + 2], out) == -1) printf("It broke\n");
     }
 }

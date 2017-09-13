@@ -16,7 +16,7 @@ FILE * create_ppm_p3(char * name, int width, int height, int max) {
      *      max    (int): max value of color value in RGB (eg: 255)
      * Returns (FILE*): File pointer to the P3 file
      */
-    FILE * out = fopen(name, "w");
+    FILE * out = fopen(name, "w+");
     fprintf(out, "P3\n");
     fprintf(out, "%d\n", width);
     fprintf(out, "%d\n", height);
@@ -35,42 +35,12 @@ FILE * create_ppm_p6(char * name, int width, int height, int max) {
      *      max    (int): max rgb value for each pixel (eg: 255)
      * Returns (FILE*): File pointer to the P6 file
      */
-    FILE * out = fopen(name, "w");
+    FILE * out = fopen(name, "w+");
     fprintf(out, "P6\n");
     fprintf(out, "%d %d\n", width, height);
     fprintf(out, "%d", max);
 
     return out;
-}
-
-
-int write_pixel(int r, int g, int b, FILE* file) {
-    /* Desc: Writes a pixel to a PPM file
-     * Args:
-     *      r, g, b (int)  : RGB values for the pixel
-     *      file    (FILE*): File to write to
-     */
-
-    // Get the filetype. Currently P3 and P6 have support
-    char type[2];
-    rewind(file);
-    fgets(type, 2, file);
-
-    fseek(file, 0, SEEK_END);
-
-    if(type == "P3") {
-        fprintf(file, "%d %d %d\n", r, g, b);
-        return 0;
-    }
-
-    if(type == "P6") {
-        fputc((unsigned char) r, file);
-        fputc((unsigned char) g, file);
-        fputc((unsigned char) b, file);
-        return 0;
-    }
-
-    return -1;
 }
 
 
@@ -126,33 +96,68 @@ int * get_ppm_file_information(FILE * ppm) {
 }
 
 
+int write_pixel(int r, int g, int b, FILE* file) {
+    /* Desc: Writes a pixel to a PPM file
+     * Args:
+     *      r, g, b (int)  : RGB values for the pixel
+     *      file    (FILE*): File to write to
+     */
+
+    // Get the filetype. Currently P3 and P6 have support
+    rewind(file);
+    int * metadata = get_ppm_file_information(file);
+
+    fseek(file, 0, SEEK_END);
+
+    if(metadata[0] == 3) {
+        fprintf(file, "%d %d %d\n", r, g, b);
+        return 0;
+    }
+
+    if(metadata[0] == 6) {
+        fputc((unsigned char) r, file);
+        fputc((unsigned char) g, file);
+        fputc((unsigned char) b, file);
+        return 0;
+    }
+
+    return -1;
+}
+
+
 int * read_image(FILE * image) {
     /* Reads in a PPM file, and creates an array of RGB values representing the pixels
      * Args:
      *      image (FILE*): File pointer to PPM image.
      * Returns (int*): 1D array of lenth width * height * 3, with RGB values for each pixel
      */
+    rewind(image);                                    // Make sure the file pointer is at the beginning
     int * metadata = get_ppm_file_information(image); // Grab the metadata
 
     // Set up the pixel array to be returned
     int * pixels = malloc(sizeof(int) * metadata[1] * metadata[2] * 3);  // width * height * 3 vals each
+    int pixelsIndex = 0;
 
-    char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
+    char * buffer = malloc(sizeof(char) * BUFFER_SIZE); 
 
     // If it's a P3 file, we have to read in chars one at a time separated by spaces, then atoi them
     if(metadata[0] == 3) {
-        int bufferIndex = 0;
-        fgets(buffer, BUFFER_SIZE, image);
-        while(buffer != NULL) {
-            for(int i = 0; i < BUFFER_SIZE; i++) {
-                char pixBuffer[BUFFER_SIZE];
-                int j = i;
-                while(buffer[i] != ' ' && buffer[i] != '\n') {
-                    pixBuffer[i - j] = buffer[i];
+        char charToIntBuffer[BUFFER_SIZE];                         // Set up buffer to put individual numbers in
+        int charToIntIndex = 0;                                    // We need a unique index for this buffer
+        while(fgets(buffer, BUFFER_SIZE, image) != NULL) {         // Keep reading until the end of the file
+            for(int i = 0; i < BUFFER_SIZE; i++) {                // Run through the buffer, grab each individual number, then refill the buffer
+                if(buffer[i] == '\0') {
+                    charToIntIndex = 0;
+                    break;
                 }
 
-                pixels[bufferIndex] = atoi(pixBuffer);
-                bufferIndex++;
+                if(buffer[i] != ' ' && buffer[i] != '\n') {
+                    charToIntBuffer[charToIntIndex] = buffer[i];
+                    charToIntIndex++;
+                } else {
+                    pixels[pixelsIndex++] = atoi(charToIntBuffer);  // Grab the actual integer value
+                    charToIntIndex = 0;                             // Reset the charToIntBuffer
+                }
             }
         }
     }
