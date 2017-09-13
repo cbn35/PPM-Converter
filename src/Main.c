@@ -71,18 +71,25 @@ int main(int argc, char ** argv) {
 
     // Get a count of the number of RGB values in the file
     int count = 0;
+    char last = 0;
     char buffer = fgetc(input);
     while(buffer != EOF) {
-        if(metadata[0] == 3 && (buffer == ' ' || buffer == '\n')) count++; 
-        if(metadata[0] == 6) count++;
+        if(metadata[0] == 3) {
+            if(buffer == '\n' && last != ' ') count++;
+            
+            if(buffer == ' ') count++;
+        }
+
+        if(metadata[0] == 6 && buffer != '\n') count++;
         
+        last = buffer;
         buffer = fgetc(input);
     }
 
+    // printf("SPACES: %d\n NEWLINES: %d\n", spaces, newlines);
+
     // If the pixmap array doesn't match the number of actual RGB values, abort
     if(count != (metadata[1] * metadata[2] * 3)) {
-        printf("%d\n", count);
-        printf("%d\n", metadata[1] * metadata[2] * 3);
         printf("ERROR: Image dimensions do not match header values\n");
         printf(errMsg);
         fclose(input);
@@ -95,6 +102,12 @@ int main(int argc, char ** argv) {
     if(atoi(argv[1]) == 6) out = create_ppm_p6(argv[3], metadata[1], metadata[2], metadata[3]);
 
     for(int i = 0; i < metadata[1] * metadata[2] * 3; i += 3) { 
-        if (write_pixel(pixmap[i], pixmap[i + 1], pixmap[i + 2], out) == -1) printf("It broke\n");
+        if (write_pixel(pixmap[i], pixmap[i + 1], pixmap[i + 2], out) == -1) {
+            printf("ERROR: Fatal error writing to output file. Do you have permission to write?\n");
+            printf(errMsg);
+            fclose(out);
+            fclose(input);
+            free(pixmap);    
+        }
     }
 }
