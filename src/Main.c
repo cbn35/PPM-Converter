@@ -99,8 +99,9 @@ int main(int argc, char ** argv) {
 
     // If the pixmap array doesn't match the number of actual RGB values, abort
     if(count != (metadata[1] * metadata[2] * 3)) {
-        printf("WIDTH: %d\nHEIGHT: %d\n HEADER: %d ACTUAL: %d\n", metadata[1], metadata[2], (metadata[1] * metadata[2] * 3), count);
-        printf("ERROR: Image dimensions do not match header values\n");
+        printf("ERROR: Image dimensions do not match header values");
+        if(metadata[0] == 6) printf(". Is this image 8 bits per channel?\n");
+            else printf("\n");
         printf("%s", errMsg);
         fclose(input);
         free(pixmap);
