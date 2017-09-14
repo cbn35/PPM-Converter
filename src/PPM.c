@@ -62,39 +62,39 @@ int * get_ppm_file_information(FILE * ppm) {
 
     // Get the width and height
     fgets(buffer, BUFFER_SIZE, ppm);
-    while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
-    char widthBuffer[255];
+    while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);  // Skip comments
+    char widthBuffer[255];                                    // Set up buffer on stack
     int i = 0;
-    while(buffer[i] != ' ' && buffer[i] != '\n') {
-        widthBuffer[i] = buffer[i];
+    while(buffer[i] != ' ' && buffer[i] != '\n') {            // Run through the original buffer, and grab the first number,
+        widthBuffer[i] = buffer[i];                           // which should either end with a newline or space
         i++;
     }
 
-    widthBuffer[i] = ' ';
-    info[1] = atoi(widthBuffer);
+    widthBuffer[i] = ' ';                                     // Put a space at the end of the string read, just to be safe
+    info[1] = atoi(widthBuffer);                              // Get the integer value
 
-    if(buffer[i] == '\n') {
+    if(buffer[i] == '\n') {                                   // If we ended with a newline, read the next line in
         fgets(buffer, BUFFER_SIZE, ppm);
         i = 0;
-    } else {
+    } else {                                                  // Otherwise, its just a space so move the index past it
         i++;
     }
 
-    char heightBuffer[BUFFER_SIZE];
+    char heightBuffer[BUFFER_SIZE];                           // Do the same thing, except for the height number
     int j = i;
     while(buffer[i] != '\n') {
         heightBuffer[i - j] = buffer[i];
         i++;
     }
     
-    info[2] = atoi(heightBuffer);
+    info[2] = atoi(heightBuffer);                             // Grab the integer value
 
     // Get the max RGB value
     fgets(buffer, BUFFER_SIZE, ppm);
-    while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);
+    while(buffer[0] == '#') fgets(buffer, BUFFER_SIZE, ppm);  // Skip comments
     info[3] = atoi(buffer);
 
-    return info;
+    return info;                                              // return {type, width, height, max}
 }
 
 
@@ -109,7 +109,7 @@ int write_pixel(int r, int g, int b, FILE* file) {
     rewind(file);
     int * metadata = get_ppm_file_information(file);
 
-    fseek(file, 0, SEEK_END); 
+    fseek(file, 0, SEEK_END);
 
     if(metadata[0] == 3) {
         fprintf(file, "%d %d %d\n", r, g, b);
