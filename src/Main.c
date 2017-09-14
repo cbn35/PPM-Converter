@@ -8,7 +8,7 @@
 #include "PPM.h"
 
 int main(int argc, char ** argv) {
-    char * errMsg = "ppmrw: convert between the PPM P3 and P6 formats\nUSAGE: ppmrw 3/6 <IMPUT FILE> <OUTPUT FILE>\n";
+    char * errMsg = "ppmrw: convert between the PPM P3 and P6 formats\nUSAGE: ppmrw 3/6 <INPUT FILE> <OUTPUT FILE>\n";
    
     // Check for wrong number of args 
     if(4 > argc || argc < 4) {
