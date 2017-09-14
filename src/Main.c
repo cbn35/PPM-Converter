@@ -69,27 +69,37 @@ int main(int argc, char ** argv) {
     rewind(input);
     get_ppm_file_information(input);
 
-    // Get a count of the number of RGB values in the file
     int count = 0;
-    char last = 0;
-    char buffer = fgetc(input);
-    while(buffer != EOF) {
-        if(metadata[0] == 3) {
-            if(buffer == '\n' && last != ' ') count++;
-            
-            if(buffer == ' ') count++;
-        }
 
-        if(metadata[0] == 6 && buffer != '\n') count++;
-        
-        last = buffer;
-        buffer = fgetc(input);
+    // Get a count of the number of RGB values in the file
+    if(metadata[0] == 3) {
+        char last = 0;
+        char buffer = fgetc(input);
+        while(buffer != EOF) {
+            if(metadata[0] == 3) {
+                if(buffer == '\n' && last != ' ') count++;
+                
+                if(buffer == ' ') count++;
+            }
+ 
+            last = buffer;
+            buffer = fgetc(input);
+        }
     }
 
-    // printf("SPACES: %d\n NEWLINES: %d\n", spaces, newlines);
+    if(metadata[0] == 6) {
+        unsigned char buffer[BUFFER_SIZE];
+        count = fread(buffer, sizeof(unsigned char), sizeof(unsigned char) * BUFFER_SIZE, input);
+        int temp = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, input);
+        while(temp > 0) {
+            count += temp;
+            temp = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, input);
+        }
+    }
 
     // If the pixmap array doesn't match the number of actual RGB values, abort
     if(count != (metadata[1] * metadata[2] * 3)) {
+        printf("WIDTH: %d\nHEIGHT: %d\n HEADER: %d ACTUAL: %d\n", metadata[1], metadata[2], (metadata[1] * metadata[2] * 3), count);
         printf("ERROR: Image dimensions do not match header values\n");
         printf(errMsg);
         fclose(input);
@@ -101,7 +111,9 @@ int main(int argc, char ** argv) {
     if(atoi(argv[1]) == 3) out = create_ppm_p3(argv[3], metadata[1], metadata[2], metadata[3]);
     if(atoi(argv[1]) == 6) out = create_ppm_p6(argv[3], metadata[1], metadata[2], metadata[3]);
 
-    for(int i = 0; i < metadata[1] * metadata[2] * 3; i += 3) { 
+    for(int i = 0; i < metadata[1] * metadata[2] * 3; i += 3) {
+        //printf("%d %d %d\n", pixmap[i], pixmap[i + 1], pixmap[i + 2]);  
+        
         if (write_pixel(pixmap[i], pixmap[i + 1], pixmap[i + 2], out) == -1) {
             printf("ERROR: Fatal error writing to output file. Do you have permission to write?\n");
             printf(errMsg);
