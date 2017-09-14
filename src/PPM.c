@@ -49,7 +49,7 @@ int * get_ppm_file_information(FILE * ppm) {
      *      ppm (FILE*): PPM file to examine
      * Returns (int*): array of the structure [type, width, height, max]
      */
-    char * buffer = malloc(sizeof(char) * BUFFER_SIZE);
+    char buffer[BUFFER_SIZE];
     int * info = malloc(sizeof(int) * 4);
 
     // Get the PPM type
@@ -59,9 +59,6 @@ int * get_ppm_file_information(FILE * ppm) {
     temp[0] = buffer[1];   // Stick the char representing the file type into temp
     temp[1] = '\0';        // Stick a null terminator in to prevent undefined behavior
     info[0] = atoi(temp);  // Finally, grab the actual number
-
-    printf("%c\n", temp[0]);
-    printf("%d\n", info[0]);
 
     // Get the width and height
     fgets(buffer, BUFFER_SIZE, ppm);
@@ -115,14 +112,16 @@ int write_pixel(int r, int g, int b, FILE* file) {
     fseek(file, 0, SEEK_END); 
 
     if(metadata[0] == 3) {
-        fprintf(file, "%d\n%d\n%d\n", r, g, b);
+        fprintf(file, "%d %d %d\n", r, g, b);
         return 0;
     }
 
     if(metadata[0] == 6) {
-        fputc((unsigned char) r, file);
-        fputc((unsigned char) g, file);
-        fputc((unsigned char) b, file);
+        unsigned char buffer[3];
+        buffer[0] = (unsigned char) r;
+        buffer[1] = (unsigned char) g;
+        buffer[2] = (unsigned char) b;
+        fwrite(buffer, sizeof(unsigned char), 3, file);
         return 0;
     }
 
@@ -171,13 +170,17 @@ int * read_image(FILE * image) {
     // If it's a P6 file, read in one char at a time, then cast that value to an int
     if(metadata[0] == 6) {
         int bufferIndex = 0;
-        fgets(buffer, BUFFER_SIZE, image);
-        while(buffer != NULL) {
+        int count = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, image);
+        while(count > 0) {
             for(int i = 0; i < BUFFER_SIZE; i++) {
-                char pixBuffer = buffer[i];
-                pixels[bufferIndex] = (int) pixBuffer;
+                if(i > count) break;
+
+                unsigned char pixBuffer = buffer[i];
+                pixels[bufferIndex] = pixBuffer;
                 bufferIndex++;
             }
+
+            count = fread(buffer, sizeof(unsigned char), BUFFER_SIZE, image);
         }
     }
 
