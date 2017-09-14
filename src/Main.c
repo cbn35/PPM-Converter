@@ -13,7 +13,7 @@ int main(int argc, char ** argv) {
     // Check for wrong number of args 
     if(4 > argc || argc < 4) {
         printf("ERROR: incorrect number of args\n");
-        printf(errMsg);
+        printf("%s", errMsg);
         return 0;
     }
 
@@ -21,7 +21,7 @@ int main(int argc, char ** argv) {
     FILE * testOpenInput = fopen(argv[2], "r");
     if(testOpenInput == NULL) {
         printf("ERROR: Input file could not be opened\n");
-        printf(errMsg);
+        printf("%s", errMsg);
         return 0;
     } else {
         fclose(testOpenInput);
@@ -31,7 +31,7 @@ int main(int argc, char ** argv) {
     FILE * testOpenOutput = fopen(argv[3], "r");
     if(testOpenOutput != NULL) {
         printf("ERROR: Output file already exists\n");
-        printf(errMsg);
+        printf("%s", errMsg);
         fclose(testOpenOutput);
         return 0;
     }
@@ -41,8 +41,8 @@ int main(int argc, char ** argv) {
     
     // If the header has an incorrect magic number, abort
     if(metadata[0] != 3 && metadata[0] != 6) {
-        printf("ERROR: Invalid PPM format in header\n");
-        printf(errMsg);
+        printf("ERROR: Invalid PPM format in header\n"); 
+        printf("%s", errMsg);
         fclose(input);
         return 0;
     }
@@ -50,7 +50,7 @@ int main(int argc, char ** argv) {
     // If the image dimensions don't make any sense, abort
     if(metadata[1] < 1 || metadata[2] < 1) {
         printf("ERROR: Invalid file size in header\n");
-        printf(errMsg);
+        printf("%s", errMsg);
         fclose(input);
         return 0;
     }
@@ -58,7 +58,7 @@ int main(int argc, char ** argv) {
     // If the max RGB value doesn't make any sense, abort
     if(1 > metadata[3]  || metadata[3] > 255) {
         printf("ERROR: Invalid Max RGB value in header\n");
-        printf(errMsg);
+        printf("%s", errMsg);
         fclose(input);
         return 0;
     }
@@ -101,7 +101,7 @@ int main(int argc, char ** argv) {
     if(count != (metadata[1] * metadata[2] * 3)) {
         printf("WIDTH: %d\nHEIGHT: %d\n HEADER: %d ACTUAL: %d\n", metadata[1], metadata[2], (metadata[1] * metadata[2] * 3), count);
         printf("ERROR: Image dimensions do not match header values\n");
-        printf(errMsg);
+        printf("%s", errMsg);
         fclose(input);
         free(pixmap);
         return 0;
@@ -116,7 +116,7 @@ int main(int argc, char ** argv) {
         
         if (write_pixel(pixmap[i], pixmap[i + 1], pixmap[i + 2], out) == -1) {
             printf("ERROR: Fatal error writing to output file. Do you have permission to write?\n");
-            printf(errMsg);
+            printf("%s", errMsg);
             fclose(out);
             fclose(input);
             free(pixmap);    
